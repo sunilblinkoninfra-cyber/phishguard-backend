@@ -1,4 +1,4 @@
-# api/routes/__init__.py - Label the toys so robot finds 'em easy!
+# api/routes/__init__.py - Bold labels for robot to find toys!
 from .auth import router as auth
 from .scan import router as scan
 from .soc import router as soc
