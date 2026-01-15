@@ -38,3 +38,6 @@ email-validator
 python-dateutil
 pytz
 requests
+
+# Rate Limiting
+slowapi
