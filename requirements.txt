@@ -25,7 +25,7 @@ httpx==0.25.2
 
 # ML & NLP for Phishing Detection
 nltk==3.8.1
-beautifulsoup
+beautifulsoup4
 scikit-learn
 
 # Malware Scanning
