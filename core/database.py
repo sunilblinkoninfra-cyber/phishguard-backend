@@ -25,8 +25,17 @@ async def get_db():
             raise
 
 async def init_db():
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        logger.info("DB tables created!")
+    except Exception as e:
+        logger.error(f"DB init failed: {e}")
+        # Retry once after 5 secs
+        import asyncio
+        await asyncio.sleep(5)
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
 
 async def close_db():
     await engine.dispose()
