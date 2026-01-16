@@ -1,56 +1,32 @@
-import logging
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
-from sqlalchemy.pool import NullPool
-
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 from core.config import settings
 
-logger = logging.getLogger(__name__)
-
-# Create async engine
 engine = create_async_engine(
     settings.DATABASE_URL,
-    echo=settings.DEBUG,
-    poolclass=NullPool if settings.ENVIRONMENT == "test" else None,
-    pool_pre_ping=True,
-    pool_size=10,
-    max_overflow=20
+    pool_pre_ping=True,  # Ping to keep pool fresh!
+    pool_recycle=300,    # Recycle connections every 5 mins
+    pool_timeout=30,     # Boost timeout to 30 secs
+    echo=settings.DEBUG  # Log queries in dev
 )
 
-# Create session factory
-AsyncSessionLocal = async_sessionmaker(
-    engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-    autocommit=False,
-    autoflush=False
-)
+AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
-async def get_db() -> AsyncSession:
-    """
-    Dependency for getting async database sessions
-    """
+Base = declarative_base()
+
+async def get_db():
     async with AsyncSessionLocal() as session:
         try:
             yield session
-        except Exception as e:
-            logger.error(f"Database session error: {e}")
+            await session.commit()
+        except Exception:
             await session.rollback()
             raise
-        finally:
-            await session.close()
 
 async def init_db():
-    """Initialize database connection"""
-    try:
-        async with engine.begin() as conn:
-            # Test connection
-            await conn.execute("SELECT 1")
-        logger.info("Database connection established")
-    except Exception as e:
-        logger.error(f"Failed to connect to database: {e}")
-        raise
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
 async def close_db():
-    """Close database connection"""
     await engine.dispose()
-    logger.info("Database connection closed")
