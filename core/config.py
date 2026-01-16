@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL", 
-        "postgresql://user:pass@localhost/phishguard"
+        "postgresql+asyncpg://user:pass@localhost/phishguard"
     )
     
     # Redis
