@@ -17,10 +17,10 @@ class Settings(BaseSettings):
     # CORS
     ALLOWED_ORIGINS: List[str] = os.getenv("ALLOWED_ORIGINS", "*").split(",")
     
-    # Database
+    # Database (async twirly shoes + Railway connect!)
     DATABASE_URL: str = os.getenv(
         "DATABASE_URL", 
-        "postgresql+asyncpg://user:pass@localhost/phishguard"
+        "postgresql+asyncpg://user:pass@localhost/phishguard"  # Swap to Railway's URL in Variables!
     )
     
     # Redis
