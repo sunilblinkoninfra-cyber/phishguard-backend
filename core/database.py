@@ -2,17 +2,19 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from core.config import settings
-
 import logging
+
 logger = logging.getLogger(__name__)
+
 engine = create_async_engine(
     settings.DATABASE_URL,
-    pool_pre_ping=True,
-    pool_recycle=300,
-    pool_timeout=60,  # Boost to 60 secs for slow wakes!
-    connect_args={"connect_timeout": 60},  # Asyncpg connect timeout boost
-    echo=settings.DEBUG
+    pool_pre_ping=True,  # Ping to keep pool fresh!
+    pool_recycle=300,    # Recycle connections every 5 mins
+    pool_timeout=60,     # Boost pool timeout to 60 secs
+    connect_args={"command_timeout": 60},  # Fixed: 'command_timeout' for asyncpg!
+    echo=settings.DEBUG  # Log queries in dev
 )
+
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = declarative_base()
