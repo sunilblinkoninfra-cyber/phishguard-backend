@@ -3,6 +3,8 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from core.config import settings
 
+import logging
+logger = logging.getLogger(__name__)
 engine = create_async_engine(
     settings.DATABASE_URL,
     pool_pre_ping=True,  # Ping to keep pool fresh!
