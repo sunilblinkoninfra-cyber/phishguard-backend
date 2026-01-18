@@ -7,12 +7,12 @@ import logging
 logger = logging.getLogger(__name__)
 engine = create_async_engine(
     settings.DATABASE_URL,
-    pool_pre_ping=True,  # Ping to keep pool fresh!
-    pool_recycle=300,    # Recycle connections every 5 mins
-    pool_timeout=30,     # Boost timeout to 30 secs
-    echo=settings.DEBUG  # Log queries in dev
+    pool_pre_ping=True,
+    pool_recycle=300,
+    pool_timeout=60,  # Boost to 60 secs for slow wakes!
+    connect_args={"connect_timeout": 60},  # Asyncpg connect timeout boost
+    echo=settings.DEBUG
 )
-
 AsyncSessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 Base = declarative_base()
